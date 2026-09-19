@@ -125,7 +125,7 @@ export function TextEffect({
       style={style}
     >
       {segments.map((seg, i) => (
-        <motion.span key={i} variants={item} className="inline-block whitespace-pre">
+        <motion.span key={i} variants={item} className="inline whitespace-pre">
           {seg}{per === 'word' && i < segments.length - 1 ? ' ' : ''}
         </motion.span>
       ))}

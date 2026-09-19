@@ -9,12 +9,15 @@ import {
   useMotionValue,
   animate,
 } from 'motion/react';
-import { TextEffect } from '@/components/ui/text-effect';
-import { AnimatedGroup } from '@/components/ui/animated-group';
-import { InView } from '@/components/ui/in-view';
-import QRCard from '@/components/QRCard';
+import { TextEffect } from '@/frontend/components/ui/text-effect';
+import { AnimatedGroup } from '@/frontend/components/ui/animated-group';
+import { InView } from '@/frontend/components/ui/in-view';
+import { TextLoop } from '@/frontend/components/ui/text-loop';
+import QRCard from '@/frontend/components/QRCard';
+import GitHubHeatmap from '@/frontend/components/GitHubHeatmap';
+import { TypewriterRoles } from '@/frontend/components/ui/typewriter-roles';
 
-const ThreeScene = lazy(() => import('@/components/ThreeScene'));
+const ThreeScene = lazy(() => import('@/frontend/components/canvas/ThreeScene'));
 
 /* ─── Types ──────────────────────────────────────────────────── */
 type Project = { id: string; title: string; desc: string; url: string; tags: string[]; featured: boolean; color: string };
@@ -287,7 +290,7 @@ export default function Page() {
     }
   }
 
-  const NAV_LINKS = ['About', 'Projects', 'Skills', 'Contact'];
+  const NAV_LINKS = ['About', 'Projects', 'Skills', 'GitHub', 'Contact'];
 
   return (
     <div ref={containerRef} style={{ background: 'var(--bg)', minHeight: '100vh', overflowX: 'hidden' }}>
@@ -298,16 +301,27 @@ export default function Page() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-10 py-4"
-        style={{ background: 'rgba(5,5,15,0.75)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+        style={{
+          background: 'rgba(7, 10, 20, 0.45)',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          borderBottom: '1px solid rgba(53, 228, 255, 0.12)',
+          boxShadow: '0 1px 0 0 rgba(53,228,255,0.06), inset 0 1px 0 0 rgba(255,255,255,0.06)',
+        }}
       >
-        <span className="text-lg font-black gradient-text tracking-tight" style={{ letterSpacing: '-0.03em' }}>
-          VK<span style={{ color: 'rgba(255,255,255,0.25)' }}>.</span>
-        </span>
+        <a href="#top" className="flex items-center gap-3" style={{ textDecoration: 'none' }}>
+          <img
+            src="/favicon.png"
+            alt="VK Logo"
+            className="w-9 h-9 rounded-xl object-cover border border-[rgba(53,228,255,0.4)] shadow-[0_0_15px_rgba(53,228,255,0.3)] transition-transform duration-300 hover:scale-105"
+          />
+          <span className="text-base font-bold gradient-text tracking-tight hidden xs:inline-block sm:inline-block">Varun Kehlawat</span>
+        </a>
         <div className="hidden sm:flex items-center gap-8">
           {NAV_LINKS.map((item) => (
             <a key={item} href={`#${item.toLowerCase()}`} className="text-sm transition-colors"
               style={{ color: 'var(--text-secondary)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#a78bfa')}
+              onMouseEnter={e => (e.currentTarget.style.color = '#35E4FF')}
               onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>
               {item}
             </a>
@@ -343,33 +357,26 @@ export default function Page() {
           className="relative z-10 flex flex-col items-center text-center px-6 max-w-5xl mx-auto"
           style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
         >
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-6 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase"
-            style={{ background: 'rgba(53,228,255,0.12)', border: '1px solid rgba(53,228,255,0.3)', color: '#35E4FF', boxShadow: '0 0 20px rgba(53,228,255,0.15)' }}
-          >
-            Full Stack Developer · BCA AI &amp; DS Student
-          </motion.div>
+          {/* Status Badge */}
+          <div className="inline-flex items-center gap-2.5 text-xs text-[#96A2C6] font-mono tracking-wide mb-6 px-3.5 py-1.5 border border-[rgba(150,162,198,0.15)] rounded-full bg-[rgba(16,21,44,0.4)]">
+            <span className="w-2 h-2 rounded-full bg-[#3ce6a4] shadow-[0_0_10px_#3ce6a4] animate-pulse" />
+            <span>Open to internships &amp; freelance</span>
+          </div>
 
           {/* Name */}
           <h1 className="text-6xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-none mb-4">
             <TextEffect preset="blur" per="word" delay={0.2} as="span" className="block gradient-text">
-              Varun
-            </TextEffect>
-            <TextEffect preset="blur" per="word" delay={0.4} as="span"
-              className="block" style={{ color: 'var(--text-primary)' } as React.CSSProperties}>
-              Kehlawat
+              Varun Kehlawat
             </TextEffect>
           </h1>
 
-          {/* Bio */}
+          {/* Typewriter Roles */}
+          <TypewriterRoles roles={['Full-Stack Developer', 'BCA · AI & Data Science', 'Builder of AI-powered things']} />
+
+          {/* Bio / Hook */}
           <TextEffect preset="fade-in-blur" per="word" delay={0.8} as="p"
-            className="text-lg max-w-2xl leading-relaxed mb-10"
-            style={{ color: 'var(--text-secondary)' } as React.CSSProperties}>
-            {hero?.bio || 'Furious about crazy tech and AI models. Building full-stack apps and exploring the bleeding edge of AI.'}
+            className="text-lg max-w-2xl leading-relaxed mb-10 text-[#96A2C6]">
+            {hero?.bio || 'Full-stack developer and BCA student in AI & Data Science, building complete products end to end and experimenting with the latest AI models.'}
           </TextEffect>
 
           {/* CTA buttons */}
@@ -588,6 +595,16 @@ export default function Page() {
         </div>
       </section>
 
+
+      {/* ── GitHub Heatmap ────────────────────────────────────────── */}
+      <section className="py-28 px-6" id="github">
+        <div className="max-w-6xl mx-auto">
+          <InView>
+            <GitHubHeatmap username="varunkehlawat-crypto" />
+          </InView>
+        </div>
+      </section>
+
       {/* ── QR Codes ──────────────────────────────────────────────── */}
       <section className="py-28 px-6 relative overflow-hidden" id="qr">
         <FloatingOrb x="10%" y="20%" size={350} color="#7c3aed" delay={0} />
@@ -752,7 +769,18 @@ export default function Page() {
       <footer className="py-8 px-8 text-center text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-5xl mx-auto">
           <span className="font-black gradient-text text-sm">Varun Kehlawat</span>
-          <span>Full Stack Developer · BCA AI &amp; DS · Passionate about Tech &amp; AI</span>
+          <TextLoop interval={4} className="text-xs text-slate-400 font-medium">
+            <span className="flex items-center gap-1.5">
+              <span className="text-cyan-400 font-semibold">Full Stack Developer</span>
+              <span>·</span>
+              <span className="text-purple-400 font-semibold">BCA AI &amp; DS Student</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-indigo-400 font-semibold">Building Modern Web &amp; AI Apps</span>
+              <span>·</span>
+              <span className="text-teal-400 font-semibold">Passionate about Tech</span>
+            </span>
+          </TextLoop>
           <div className="flex items-center gap-4">
             <a href="https://www.linkedin.com/in/varun-kehlawat-662a81379/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}
               onMouseEnter={e => (e.currentTarget.style.color = '#a78bfa')}
