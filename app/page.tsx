@@ -87,17 +87,45 @@ function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const seen = useRef(false);
+
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !seen.current) {
-        seen.current = true;
-        const controls = animate(0, to, { duration: 2, ease: [0.16, 1, 0.3, 1], onUpdate: (v) => setCount(Math.round(v)) });
-        return () => controls.stop();
-      }
-    }, { threshold: 0.5 });
+    let controls: { stop: () => void } | null = null;
+
+    const startAnimation = () => {
+      if (seen.current) return;
+      seen.current = true;
+      controls = animate(0, to, {
+        duration: 2,
+        ease: [0.16, 1, 0.3, 1],
+        onUpdate: (v) => setCount(Math.round(v)),
+        onComplete: () => setCount(to),
+      });
+    };
+
+    // Safety fallback: ensure counter runs even if observer misses
+    const fallbackTimer = setTimeout(() => {
+      startAnimation();
+    }, 500);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          clearTimeout(fallbackTimer);
+          startAnimation();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
     if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
+
+    return () => {
+      clearTimeout(fallbackTimer);
+      observer.disconnect();
+      if (controls) controls.stop();
+    };
   }, [to]);
+
   return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
 }
 
