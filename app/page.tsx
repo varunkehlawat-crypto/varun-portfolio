@@ -3,12 +3,15 @@
 import { useRef, useState, useEffect, Suspense, lazy } from 'react';
 import {
   motion,
+  AnimatePresence,
   useScroll,
   useTransform,
   useSpring,
   useMotionValue,
   animate,
 } from 'motion/react';
+import { Menu, X, FolderGit2, ExternalLink, Settings } from 'lucide-react';
+import { LinkedinIcon, InstagramIcon, Mail, Globe, Truck } from '@/frontend/components/icons';
 import { TextEffect } from '@/frontend/components/ui/text-effect';
 import { AnimatedGroup } from '@/frontend/components/ui/animated-group';
 import { InView } from '@/frontend/components/ui/in-view';
@@ -164,6 +167,39 @@ function MagneticButton({ children, className, href, onClick, style }: { childre
   );
 }
 
+/* ─── Tech Icon Resolver ───────────────────────────────────────────── */
+const SKILL_ICON_MAP: Record<string, string> = {
+  'react': 'https://cdn.simpleicons.org/react/61DAFB',
+  'next.js': 'https://cdn.simpleicons.org/nextdotjs/ffffff',
+  'nextjs': 'https://cdn.simpleicons.org/nextdotjs/ffffff',
+  'typescript': 'https://cdn.simpleicons.org/typescript/3178C6',
+  'javascript': 'https://cdn.simpleicons.org/javascript/F7DF1E',
+  'node.js': 'https://cdn.simpleicons.org/nodedotjs/5FA04E',
+  'nodejs': 'https://cdn.simpleicons.org/nodedotjs/5FA04E',
+  'postgresql': 'https://cdn.simpleicons.org/postgresql/4169E1',
+  'postgres': 'https://cdn.simpleicons.org/postgresql/4169E1',
+  'tailwind css': 'https://cdn.simpleicons.org/tailwindcss/06B6D4',
+  'tailwind': 'https://cdn.simpleicons.org/tailwindcss/06B6D4',
+  'three.js': 'https://cdn.simpleicons.org/threedotjs/ffffff',
+  'threejs': 'https://cdn.simpleicons.org/threedotjs/ffffff',
+  'python': 'https://cdn.simpleicons.org/python/3776AB',
+  'supabase': 'https://cdn.simpleicons.org/supabase/3ECF8E',
+  'git': 'https://cdn.simpleicons.org/git/F05032',
+  'prisma': 'https://cdn.simpleicons.org/prisma/ffffff',
+  'java': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg',
+  'ai / ml': 'https://cdn.simpleicons.org/tensorflow/FF6F00',
+  'ai': 'https://cdn.simpleicons.org/openai/ffffff',
+  'ml': 'https://cdn.simpleicons.org/tensorflow/FF6F00',
+};
+
+function getSkillIcon(skill: { name: string; icon: string }): string {
+  if (skill.icon && skill.icon.startsWith('http')) {
+    return skill.icon;
+  }
+  const key = (skill.name || '').toLowerCase().trim();
+  return SKILL_ICON_MAP[key] || 'https://cdn.simpleicons.org/codefactor/ffffff';
+}
+
 /* ─── Tech Marquee ───────────────────────────────────────────── */
 function SkillsMarquee({ skills }: { skills: Skill[] }) {
   const items = [...skills, ...skills];
@@ -174,20 +210,31 @@ function SkillsMarquee({ skills }: { skills: Skill[] }) {
         animate={{ x: ['0%', '-50%'] }}
         transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
       >
-        {items.map((s, i) => (
-          <span key={i} className="text-sm font-medium px-4 py-2 rounded-full flex items-center gap-2"
-            style={{ color: s.color || 'var(--text-secondary)', border: '1px solid var(--border)', background: 'var(--surface)' }}>
-            <span>{s.icon}</span>
-            <span style={{ color: 'var(--text-secondary)' }}>{s.name}</span>
-          </span>
-        ))}
+        {items.map((s, i) => {
+          const iconUrl = getSkillIcon(s);
+          return (
+            <span key={i} className="text-sm font-medium px-4 py-2 rounded-full flex items-center gap-2"
+              style={{ color: s.color || 'var(--text-secondary)', border: '1px solid var(--border)', background: 'var(--surface)' }}>
+              <img src={iconUrl} alt={s.name} className="w-4 h-4 object-contain flex-shrink-0" style={{ filter: 'drop-shadow(0 0 4px ' + (s.color || '#fff') + '55)' }} />
+              <span style={{ color: 'var(--text-secondary)' }}>{s.name}</span>
+            </span>
+          );
+        })}
       </motion.div>
     </div>
   );
 }
 
 /* ─── Project Card ───────────────────────────────────────────── */
+function getProjectIcon(title: string) {
+  const lower = (title || '').toLowerCase();
+  if (lower.includes('abroadly')) return Globe;
+  if (lower.includes('balaji') || lower.includes('logistics')) return Truck;
+  return FolderGit2;
+}
+
 function ProjectCard({ project }: { project: Project }) {
+  const IconComp = getProjectIcon(project.title);
   return (
     <TiltCard intensity={12} className="h-full">
       <motion.a
@@ -211,10 +258,10 @@ function ProjectCard({ project }: { project: Project }) {
         <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700"
           style={{ background: `radial-gradient(circle, ${project.color}20, transparent 70%)`, filter: 'blur(20px)' }} />
 
-        {/* Color dot */}
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+        {/* Color icon container */}
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: `${project.color}15`, border: `1px solid ${project.color}40`, boxShadow: `0 0 25px ${project.color}40` }}>
-          🚀
+          <IconComp className="w-6 h-6" style={{ color: project.color }} />
         </div>
 
         <div className="flex-1">
@@ -256,9 +303,12 @@ export default function Page() {
   const [portfolioData, setPortfolioData] = useState<{ hero: Hero; projects: Project[]; skills: Skill[] } | null>(null);
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    fetch('/api/portfolio').then(r => r.json()).then(setPortfolioData);
+    fetch(`/api/portfolio?_t=${Date.now()}`, { cache: 'no-store' })
+      .then(r => r.json())
+      .then(setPortfolioData);
   }, []);
 
   const hero = portfolioData?.hero;
@@ -300,23 +350,25 @@ export default function Page() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-10 py-4"
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-10 py-3.5"
         style={{
-          background: 'rgba(7, 10, 20, 0.45)',
+          background: 'rgba(7, 10, 20, 0.65)',
           backdropFilter: 'blur(24px) saturate(180%)',
           WebkitBackdropFilter: 'blur(24px) saturate(180%)',
           borderBottom: '1px solid rgba(53, 228, 255, 0.12)',
           boxShadow: '0 1px 0 0 rgba(53,228,255,0.06), inset 0 1px 0 0 rgba(255,255,255,0.06)',
         }}
       >
-        <a href="#top" className="flex items-center gap-3" style={{ textDecoration: 'none' }}>
+        <a href="#top" className="flex items-center gap-2.5" style={{ textDecoration: 'none' }}>
           <img
             src="/favicon.png"
             alt="VK Logo"
-            className="w-9 h-9 rounded-xl object-cover border border-[rgba(53,228,255,0.4)] shadow-[0_0_15px_rgba(53,228,255,0.3)] transition-transform duration-300 hover:scale-105"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-[rgba(53,228,255,0.4)] shadow-[0_0_15px_rgba(53,228,255,0.3)] transition-transform duration-300 hover:scale-105"
           />
-          <span className="text-base font-bold gradient-text tracking-tight hidden xs:inline-block sm:inline-block">Varun Kehlawat</span>
+          <span className="text-sm sm:text-base font-bold gradient-text tracking-tight">Varun Kehlawat</span>
         </a>
+
+        {/* Desktop Nav Links */}
         <div className="hidden sm:flex items-center gap-8">
           {NAV_LINKS.map((item) => (
             <a key={item} href={`#${item.toLowerCase()}`} className="text-sm transition-colors"
@@ -327,17 +379,59 @@ export default function Page() {
             </a>
           ))}
         </div>
-        <MagneticButton
-          href="mailto:varunkehlawat@gmail.com"
-          className="px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all"
-          style={{ background: 'var(--grad)', color: '#04060f', boxShadow: '0 0 20px rgba(53,228,255,0.3)', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties}
-        >
-          Hire Me →
-        </MagneticButton>
+
+        <div className="flex items-center gap-3">
+          <MagneticButton
+            href="mailto:varunkehlawat@gmail.com"
+            className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-white transition-all"
+            style={{ background: 'var(--grad)', color: '#04060f', boxShadow: '0 0 20px rgba(53,228,255,0.3)', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties}
+          >
+            Hire Me →
+          </MagneticButton>
+
+          {/* Mobile menu toggle */}
+          <button
+            onClick={() => setMobileMenuOpen(open => !open)}
+            aria-label="Toggle navigation menu"
+            className="sm:hidden p-2 rounded-xl text-[#35E4FF] bg-[rgba(53,228,255,0.08)] border border-[rgba(53,228,255,0.2)]"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </motion.nav>
 
+      {/* Mobile Slide-Down Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-[61px] left-0 right-0 z-40 sm:hidden p-5 flex flex-col gap-4 border-b border-[rgba(53,228,255,0.15)] shadow-2xl"
+            style={{
+              background: 'rgba(7, 10, 20, 0.95)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+            }}
+          >
+            {NAV_LINKS.map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-base font-semibold py-2 px-3 rounded-lg text-[#EAF0FF] hover:bg-[rgba(53,228,255,0.1)] hover:text-[#35E4FF] transition-colors"
+                style={{ textDecoration: 'none' }}
+              >
+                {item}
+              </a>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Hero ──────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-20 pb-12 sm:py-0">
         {/* Three.js WebGL Canvas */}
         <div className="absolute inset-0 z-0">
           <Suspense fallback={null}>
@@ -354,17 +448,17 @@ export default function Page() {
 
         {/* Foreground */}
         <motion.div
-          className="relative z-10 flex flex-col items-center text-center px-6 max-w-5xl mx-auto"
+          className="relative z-10 flex flex-col items-center text-center px-4 sm:px-6 max-w-5xl mx-auto w-full"
           style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
         >
           {/* Status Badge */}
-          <div className="inline-flex items-center gap-2.5 text-xs text-[#96A2C6] font-mono tracking-wide mb-6 px-3.5 py-1.5 border border-[rgba(150,162,198,0.15)] rounded-full bg-[rgba(16,21,44,0.4)]">
-            <span className="w-2 h-2 rounded-full bg-[#3ce6a4] shadow-[0_0_10px_#3ce6a4] animate-pulse" />
-            <span>Open to internships &amp; freelance</span>
+          <div className="inline-flex items-center gap-2 text-[11px] sm:text-xs text-[#96A2C6] font-mono tracking-wide mb-4 sm:mb-6 px-3 py-1 sm:px-3.5 sm:py-1.5 border border-[rgba(150,162,198,0.15)] rounded-full bg-[rgba(16,21,44,0.4)] max-w-full">
+            <span className="w-2 h-2 rounded-full bg-[#3ce6a4] shadow-[0_0_10px_#3ce6a4] animate-pulse flex-shrink-0" />
+            <span className="truncate">Open to internships &amp; freelance</span>
           </div>
 
           {/* Name */}
-          <h1 className="text-6xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-none mb-4">
+          <h1 className="text-4xl xs:text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-tight mb-3 sm:mb-4">
             <TextEffect preset="blur" per="word" delay={0.2} as="span" className="block gradient-text">
               Varun Kehlawat
             </TextEffect>
@@ -375,22 +469,22 @@ export default function Page() {
 
           {/* Bio / Hook */}
           <TextEffect preset="fade-in-blur" per="word" delay={0.8} as="p"
-            className="text-lg max-w-2xl leading-relaxed mb-10 text-[#96A2C6]">
+            className="text-sm sm:text-lg max-w-2xl leading-relaxed mb-6 sm:mb-10 text-[#96A2C6] px-2">
             {hero?.bio || 'Full-stack developer and BCA student in AI & Data Science, building complete products end to end and experimenting with the latest AI models.'}
           </TextEffect>
 
           {/* CTA buttons */}
-          <AnimatedGroup preset="blur-slide" className="flex flex-wrap gap-4 justify-center mb-12">
+          <AnimatedGroup preset="blur-slide" className="flex flex-col xs:flex-row gap-3 sm:gap-4 justify-center items-center mb-8 sm:mb-12 w-full xs:w-auto px-4 xs:px-0">
             <MagneticButton
               href="#projects"
-              className="px-8 py-4 rounded-xl text-base font-semibold text-white"
+              className="w-full xs:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-semibold text-white text-center"
               style={{ background: 'var(--grad)', color: '#04060f', boxShadow: '0 8px 30px rgba(53,228,255,0.22)', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties}
             >
               View My Work →
             </MagneticButton>
             <MagneticButton
               href={hero?.linkedin || 'https://www.linkedin.com/in/varun-kehlawat-662a81379/'}
-              className="px-8 py-4 rounded-xl text-base font-semibold glass"
+              className="w-full xs:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-semibold glass text-center"
               style={{ color: 'var(--text-primary)', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties}
             >
               LinkedIn ↗
@@ -398,25 +492,33 @@ export default function Page() {
           </AnimatedGroup>
 
           {/* Social links row */}
-          <AnimatedGroup preset="blur-slide" className="flex gap-4 flex-wrap justify-center">
-            {[
-              { icon: '💼', label: 'LinkedIn', color: '#0077b5', glow: 'rgba(0,119,181,0.3)', href: hero?.linkedin || 'https://www.linkedin.com/in/varun-kehlawat-662a81379/' },
-              { icon: '📸', label: 'Instagram', color: '#e1306c', glow: 'rgba(225,48,108,0.3)', href: hero?.instagram || 'https://www.instagram.com/varunkehlawatt' },
-              { icon: '✉️', label: 'Email', color: '#a78bfa', glow: 'rgba(167,139,250,0.3)', href: `mailto:${hero?.email || 'varunkehlawat@gmail.com'}` },
-              { icon: '🚀', label: 'Abroadly', color: '#7c3aed', glow: 'rgba(124,58,237,0.3)', href: 'https://abroadly-sepia.vercel.app/' },
-              { icon: '🏢', label: 'Shri Balaji', color: '#06b6d4', glow: 'rgba(6,182,212,0.3)', href: 'https://www.shribalajilogisticsandservices.com/' },
-            ].map(({ icon, label, color, glow, href }) => (
+          <AnimatedGroup preset="blur-slide" className="flex gap-2.5 sm:gap-4 flex-wrap justify-center">
+            {(([
+              { icon: LinkedinIcon, label: 'LinkedIn', color: '#0077b5', glow: 'rgba(0,119,181,0.3)', href: hero?.linkedin || 'https://www.linkedin.com/in/varun-kehlawat-662a81379/', iconBg: '#0A66C2' },
+              { icon: InstagramIcon, label: 'Instagram', color: '#e1306c', glow: 'rgba(225,48,108,0.3)', href: hero?.instagram || 'https://www.instagram.com/varunkehlawatt', iconBg: 'linear-gradient(135deg, #f09433, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888)' },
+              { icon: Mail, label: 'Email', color: '#a78bfa', glow: 'rgba(167,139,250,0.3)', href: `mailto:${hero?.email || 'varunkehlawat@gmail.com'}` },
+              { icon: Globe, label: 'Abroadly', color: '#7c3aed', glow: 'rgba(124,58,237,0.3)', href: 'https://abroadly-sepia.vercel.app/' },
+              { icon: Truck, label: 'Shri Balaji', color: '#06b6d4', glow: 'rgba(6,182,212,0.3)', href: 'https://www.shribalajilogisticsandservices.com/' },
+            ]) as { icon: React.ElementType; label: string; color: string; glow: string; href: string; iconBg?: string }[]).map(({ icon: IconComp, label, color, glow, href, iconBg }) => (
               <TiltCard key={label} intensity={15} className="flex-shrink-0">
                 <a href={href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                  <div className="w-20 h-20 rounded-2xl flex flex-col items-center justify-center gap-1 relative overflow-hidden"
+                  <div className="w-14 h-14 xs:w-16 xs:h-16 sm:w-20 sm:h-20 rounded-2xl flex flex-col items-center justify-center gap-0.5 sm:gap-1 relative overflow-hidden"
                     style={{
                       background: `linear-gradient(135deg, ${color}22, ${color}08)`,
                       border: `1px solid ${color}40`,
                       boxShadow: `0 0 20px ${glow}, inset 0 0 20px ${color}10`,
                       transformStyle: 'preserve-3d',
                     }}>
-                    <span className="text-2xl" style={{ transform: 'translateZ(8px)' }}>{icon}</span>
-                    <span className="text-xs font-medium" style={{ color, transform: 'translateZ(4px)' }}>{label}</span>
+                    {iconBg ? (
+                      <div className="w-7 h-7 xs:w-8 xs:h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: iconBg, transform: 'translateZ(8px)', boxShadow: `0 2px 12px ${glow}` }}>
+                        <IconComp className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-white" />
+                      </div>
+                    ) : (
+                      <IconComp className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8"
+                        style={{ color, transform: 'translateZ(8px)', filter: `drop-shadow(0 0 6px ${color}aa)` }} />
+                    )}
+                    <span className="text-[10px] sm:text-xs font-medium" style={{ color, transform: 'translateZ(4px)' }}>{label}</span>
                     <div className="absolute inset-0 rounded-2xl pointer-events-none"
                       style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%)' }} />
                   </div>
@@ -428,41 +530,41 @@ export default function Page() {
 
         {/* Scroll cue */}
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
+          className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10 hidden xs:flex"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           style={{ color: 'var(--text-secondary)', opacity: 0.6 } as React.CSSProperties}
         >
-          <span className="text-xs tracking-widest uppercase">Scroll</span>
-          <div className="w-px h-10 rounded-full"          style={{ background: 'linear-gradient(to bottom, #35E4FF, transparent)', borderRadius: '999px' }} />
+          <span className="text-[10px] sm:text-xs tracking-widest uppercase">Scroll</span>
+          <div className="w-px h-8 sm:h-10 rounded-full" style={{ background: 'linear-gradient(to bottom, #35E4FF, transparent)', borderRadius: '999px' }} />
         </motion.div>
       </section>
 
       {/* ── About ─────────────────────────────────────────────────── */}
-      <section className="py-28 px-6" id="about">
+      <section className="py-16 sm:py-28 px-4 sm:px-6" id="about">
         <div className="max-w-5xl mx-auto">
           <InView>
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
               <div>
-                <p className="text-xs tracking-widest uppercase font-semibold mb-3" style={{ color: '#35E4FF' }}>About Me</p>
-                <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-6">
+                <p className="text-xs tracking-widest uppercase font-semibold mb-2 sm:mb-3" style={{ color: '#35E4FF' }}>About Me</p>
+                <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-4 sm:mb-6">
                   Building the{' '}
                   <span className="gradient-text"><ScrambleText text="future with code" /></span>
                 </h2>
-                <p className="text-base leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-sm sm:text-base leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
                   I&apos;m <strong style={{ color: '#f1f0ff' }}>Varun Kehlawat</strong> — a full-stack developer and BCA (AI &amp; DS) student, obsessed with pushing the boundaries of what&apos;s possible with technology.
                 </p>
-                <p className="text-base leading-relaxed mb-8" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-sm sm:text-base leading-relaxed mb-6 sm:mb-8" style={{ color: 'var(--text-secondary)' }}>
                   From building production-grade web apps to experimenting with cutting-edge AI models — I&apos;m always chasing the next big thing in tech.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <MagneticButton href="mailto:varunkehlawat@gmail.com"
-                    className="px-6 py-3 rounded-xl text-sm font-semibold"
+                    className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold"
                     style={{ background: 'var(--grad)', color: '#04060f', boxShadow: '0 0 30px rgba(53,228,255,0.3)', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties}>
                     Get in Touch →
                   </MagneticButton>
                   <MagneticButton href={hero?.linkedin || 'https://www.linkedin.com/in/varun-kehlawat-662a81379/'}
-                    className="px-6 py-3 rounded-xl text-sm font-semibold glass"
+                    className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold glass"
                     style={{ color: 'var(--text-primary)', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties}>
                     LinkedIn ↗
                   </MagneticButton>
@@ -470,8 +572,8 @@ export default function Page() {
               </div>
 
               {/* Stats */}
-              <ParallaxSection depth={0.05}>
-                <AnimatedGroup preset="blur-slide" className="grid grid-cols-2 gap-4">
+              <div>
+                <AnimatedGroup preset="blur-slide" className="grid grid-cols-2 gap-3 sm:gap-4">
                   {[
                     { val: 2, suffix: '+', label: 'Live Projects' },
                     { val: 1, suffix: '+', label: 'Years Building' },
@@ -479,57 +581,59 @@ export default function Page() {
                     { val: 100, suffix: '%', label: 'Passion' },
                   ].map(({ val, suffix, label }) => (
                     <TiltCard key={label} intensity={10} className="h-full">
-                      <div className="flex flex-col items-center text-center py-8 rounded-2xl relative overflow-hidden"
+                      <div className="flex flex-col items-center text-center py-5 sm:py-8 rounded-2xl relative overflow-hidden"
                         style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-px rounded-full"
                           style={{ background: 'linear-gradient(90deg, transparent, rgba(53,228,255,0.6), transparent)' }} />
-                        <span className="text-4xl font-black gradient-text mb-1">
+                        <span className="text-3xl sm:text-4xl font-black gradient-text mb-1">
                           <Counter to={val} suffix={suffix} />
                         </span>
-                        <span className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+                        <span className="text-[11px] sm:text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{label}</span>
                       </div>
                     </TiltCard>
                   ))}
                 </AnimatedGroup>
-              </ParallaxSection>
+              </div>
             </div>
           </InView>
         </div>
       </section>
 
       {/* ── Skills Marquee ────────────────────────────────────────── */}
-      <section className="py-10 overflow-hidden" style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+      <section className="py-6 sm:py-10 overflow-hidden" style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
         <SkillsMarquee skills={skills.length > 0 ? skills : [
-          { name: 'React', icon: '⚛️', color: '#61dafb' },
-          { name: 'Next.js', icon: '▲', color: '#ffffff' },
-          { name: 'TypeScript', icon: '📘', color: '#3178c6' },
-          { name: 'Node.js', icon: '🟢', color: '#5fa04e' },
-          { name: 'PostgreSQL', icon: '🐘', color: '#4169e1' },
-          { name: 'Tailwind CSS', icon: '🎨', color: '#38bdf8' },
-          { name: 'Three.js', icon: '⬡', color: '#7c3aed' },
-          { name: 'Python', icon: '🐍', color: '#f7c948' },
-          { name: 'AI / ML', icon: '🤖', color: '#ec4899' },
-          { name: 'Supabase', icon: '⚡', color: '#3ecf8e' },
+          { name: 'React',        icon: 'https://cdn.simpleicons.org/react/61DAFB',        color: '#61dafb' },
+          { name: 'Next.js',      icon: 'https://cdn.simpleicons.org/nextdotjs/ffffff',     color: '#ffffff' },
+          { name: 'TypeScript',   icon: 'https://cdn.simpleicons.org/typescript/3178C6',   color: '#3178c6' },
+          { name: 'Node.js',      icon: 'https://cdn.simpleicons.org/nodedotjs/5FA04E',     color: '#5fa04e' },
+          { name: 'PostgreSQL',   icon: 'https://cdn.simpleicons.org/postgresql/4169E1',   color: '#4169e1' },
+          { name: 'Tailwind CSS', icon: 'https://cdn.simpleicons.org/tailwindcss/06B6D4',   color: '#38bdf8' },
+          { name: 'Three.js',     icon: 'https://cdn.simpleicons.org/threedotjs/ffffff',   color: '#ffffff' },
+          { name: 'Python',       icon: 'https://cdn.simpleicons.org/python/3776AB',       color: '#f7c948' },
+          { name: 'Supabase',     icon: 'https://cdn.simpleicons.org/supabase/3ECF8E',     color: '#3ecf8e' },
+          { name: 'Git',          icon: 'https://cdn.simpleicons.org/git/F05032',          color: '#f05032' },
+          { name: 'Prisma',       icon: 'https://cdn.simpleicons.org/prisma/ffffff',       color: '#a78bfa' },
+          { name: 'AI / ML',      icon: 'https://cdn.simpleicons.org/tensorflow/FF6F00',   color: '#ec4899' },
         ]} />
       </section>
 
       {/* ── Projects ──────────────────────────────────────────────── */}
-      <section className="py-28 px-6" id="projects">
+      <section className="py-16 sm:py-28 px-4 sm:px-6" id="projects">
         <div className="max-w-6xl mx-auto">
           <InView>
-            <div className="text-center mb-16">
-              <p className="text-xs tracking-widest uppercase font-semibold mb-3" style={{ color: '#35E4FF' }}>My Work</p>
-              <h2 className="text-4xl sm:text-6xl font-black tracking-tight mb-4">
+            <div className="text-center mb-10 sm:mb-16">
+              <p className="text-xs tracking-widest uppercase font-semibold mb-2 sm:mb-3" style={{ color: '#35E4FF' }}>My Work</p>
+              <h2 className="text-3xl sm:text-6xl font-black tracking-tight mb-3 sm:mb-4">
                 Projects I&apos;ve{' '}
                 <span className="gradient-text">built</span>
               </h2>
-              <p className="text-lg max-w-xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-sm sm:text-lg max-w-xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
                 Real-world applications shipped and live on the internet.
               </p>
             </div>
           </InView>
 
-          <div className="grid sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {(projects.length > 0 ? projects : [
               {
                 id: '1', title: 'Abroadly', featured: true, color: '#7c3aed',
@@ -543,11 +647,9 @@ export default function Page() {
                 url: 'https://www.shribalajilogisticsandservices.com/',
                 tags: ['Full Stack', 'Business', 'Web Design'],
               },
-            ] as Project[]).map((project, i) => (
+            ] as Project[]).map((project) => (
               <InView key={project.id} viewOptions={{ once: true, margin: '-40px' }}>
-                <ParallaxSection depth={0.03 * (i % 2)}>
-                  <ProjectCard project={project} />
-                </ParallaxSection>
+                <ProjectCard project={project} />
               </InView>
             ))}
           </div>
@@ -555,49 +657,55 @@ export default function Page() {
       </section>
 
       {/* ── Skills Grid ───────────────────────────────────────────── */}
-      <section className="py-28 px-6" id="skills">
+      <section className="py-16 sm:py-28 px-4 sm:px-6" id="skills">
         <div className="max-w-6xl mx-auto">
           <InView>
-            <div className="text-center mb-16">
-              <p className="text-xs tracking-widest uppercase font-semibold mb-3" style={{ color: '#35E4FF' }}>Tech Stack</p>
-              <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-4">
+            <div className="text-center mb-10 sm:mb-16">
+              <p className="text-xs tracking-widest uppercase font-semibold mb-2 sm:mb-3" style={{ color: '#35E4FF' }}>Tech Stack</p>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-3 sm:mb-4">
                 Tools &amp; <span className="gradient-text">Technologies</span>
               </h2>
             </div>
           </InView>
 
-          <AnimatedGroup preset="blur-slide" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <AnimatedGroup preset="blur-slide" className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
             {(skills.length > 0 ? skills : [
-              { name: 'React', icon: '⚛️', color: '#61dafb' },
-              { name: 'Next.js', icon: '▲', color: '#ffffff' },
-              { name: 'TypeScript', icon: '📘', color: '#3178c6' },
-              { name: 'Node.js', icon: '🟢', color: '#5fa04e' },
-              { name: 'PostgreSQL', icon: '🐘', color: '#4169e1' },
-              { name: 'Tailwind CSS', icon: '🎨', color: '#38bdf8' },
-              { name: 'Three.js', icon: '⬡', color: '#7c3aed' },
-              { name: 'Python', icon: '🐍', color: '#f7c948' },
-              { name: 'AI / ML', icon: '🤖', color: '#ec4899' },
-              { name: 'Supabase', icon: '⚡', color: '#3ecf8e' },
-            ] as Skill[]).map((skill) => (
-              <TiltCard key={skill.name} intensity={15}>
-                <div className="flex flex-col items-center gap-2 py-6 px-4 rounded-2xl relative overflow-hidden"
-                  style={{
-                    background: `linear-gradient(135deg, ${skill.color}15, ${skill.color}05)`,
-                    border: `1px solid ${skill.color}30`,
-                    boxShadow: `0 0 20px ${skill.color}15`,
-                  }}>
-                  <span className="text-3xl">{skill.icon}</span>
-                  <span className="text-xs font-semibold text-center" style={{ color: skill.color }}>{skill.name}</span>
-                </div>
-              </TiltCard>
-            ))}
+              { name: 'React',        icon: 'https://cdn.simpleicons.org/react/61DAFB',        color: '#61dafb' },
+              { name: 'Next.js',      icon: 'https://cdn.simpleicons.org/nextdotjs/ffffff',     color: '#ffffff' },
+              { name: 'TypeScript',   icon: 'https://cdn.simpleicons.org/typescript/3178C6',   color: '#3178c6' },
+              { name: 'Node.js',      icon: 'https://cdn.simpleicons.org/nodedotjs/5FA04E',     color: '#5fa04e' },
+              { name: 'PostgreSQL',   icon: 'https://cdn.simpleicons.org/postgresql/4169E1',   color: '#4169e1' },
+              { name: 'Tailwind CSS', icon: 'https://cdn.simpleicons.org/tailwindcss/06B6D4',   color: '#38bdf8' },
+              { name: 'Three.js',     icon: 'https://cdn.simpleicons.org/threedotjs/ffffff',   color: '#ffffff' },
+              { name: 'Python',       icon: 'https://cdn.simpleicons.org/python/3776AB',       color: '#f7c948' },
+              { name: 'Supabase',     icon: 'https://cdn.simpleicons.org/supabase/3ECF8E',     color: '#3ecf8e' },
+              { name: 'Git',          icon: 'https://cdn.simpleicons.org/git/F05032',          color: '#f05032' },
+              { name: 'Prisma',       icon: 'https://cdn.simpleicons.org/prisma/ffffff',       color: '#a78bfa' },
+              { name: 'AI / ML',      icon: 'https://cdn.simpleicons.org/tensorflow/FF6F00',   color: '#ec4899' },
+            ] as Skill[]).map((skill) => {
+              const iconUrl = getSkillIcon(skill);
+              return (
+                <TiltCard key={skill.name} intensity={15}>
+                  <div className="flex flex-col items-center gap-2 py-4 sm:py-6 px-3 sm:px-4 rounded-2xl relative overflow-hidden"
+                    style={{
+                      background: `linear-gradient(135deg, ${skill.color}15, ${skill.color}05)`,
+                      border: `1px solid ${skill.color}30`,
+                      boxShadow: `0 0 20px ${skill.color}15`,
+                    }}>
+                    <img src={iconUrl} alt={skill.name}
+                      className="w-9 h-9 sm:w-12 sm:h-12 object-contain"
+                      style={{ filter: `drop-shadow(0 0 8px ${skill.color}88)` }} />
+                    <span className="text-[11px] sm:text-xs font-semibold text-center" style={{ color: skill.color }}>{skill.name}</span>
+                  </div>
+                </TiltCard>
+              );
+            })}
           </AnimatedGroup>
         </div>
       </section>
 
-
       {/* ── GitHub Heatmap ────────────────────────────────────────── */}
-      <section className="py-28 px-6" id="github">
+      <section className="py-16 sm:py-28 px-4 sm:px-6" id="github">
         <div className="max-w-6xl mx-auto">
           <InView>
             <GitHubHeatmap username="varunkehlawat-crypto" />
@@ -606,81 +714,83 @@ export default function Page() {
       </section>
 
       {/* ── QR Codes ──────────────────────────────────────────────── */}
-      <section className="py-28 px-6 relative overflow-hidden" id="qr">
-        <FloatingOrb x="10%" y="20%" size={350} color="#7c3aed" delay={0} />
+      <section className="py-16 sm:py-28 px-4 sm:px-6 relative overflow-hidden" id="qr">
+        <FloatingOrb x="10%" y="20%" size={350} color="#0A66C2" delay={0} />
         <FloatingOrb x="70%" y="40%" size={280} color="#e1306c" delay={2} />
         <div className="max-w-4xl mx-auto relative z-10">
           <InView>
-            <div className="text-center mb-16">
-              <p className="text-xs tracking-widest uppercase font-semibold mb-3" style={{ color: '#35E4FF' }}>Connect</p>
-              <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-4">
+            <div className="text-center mb-10 sm:mb-16">
+              <p className="text-xs tracking-widest uppercase font-semibold mb-2 sm:mb-3" style={{ color: '#35E4FF' }}>Connect</p>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight mb-3 sm:mb-4">
                 Scan to{' '}
                 <span className="gradient-text">Connect</span>
               </h2>
-              <p className="text-base max-w-lg mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-sm sm:text-base max-w-lg mx-auto" style={{ color: 'var(--text-secondary)' }}>
                 Scan these QR codes to connect with Varun on social media — or download them for a business card, event, or presentation.
               </p>
             </div>
           </InView>
 
-          <div className="grid sm:grid-cols-2 gap-8 max-w-2xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 max-w-2xl mx-auto">
             <QRCard
               title="LinkedIn"
               subtitle="Varun Kehlawat"
-              url="https://www.linkedin.com/in/varun-kehlawat-662a81379/"
-              icon="💼"
-              color="#0077b5"
-              glow="rgba(0,119,181,0.25)"
+              url={hero?.linkedin || "https://www.linkedin.com/in/varun-kehlawat-662a81379/"}
+              icon={LinkedinIcon}
+              iconBg="#0A66C2"
+              color="#0A66C2"
+              glow="rgba(10,102,194,0.45)"
             />
             <QRCard
               title="Instagram"
               subtitle="@varunkehlawatt"
-              url="https://www.instagram.com/varunkehlawatt"
-              icon="📸"
+              url={hero?.instagram || "https://www.instagram.com/varunkehlawatt"}
+              icon={InstagramIcon}
+              iconBg="linear-gradient(135deg, #f09433, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888)"
               color="#e1306c"
-              glow="rgba(225,48,108,0.25)"
+              glow="rgba(225,48,108,0.45)"
             />
           </div>
         </div>
       </section>
 
       {/* ── Contact ───────────────────────────────────────────────── */}
-      <section className="py-28 px-6 relative overflow-hidden" id="contact">
+      <section className="py-16 sm:py-28 px-4 sm:px-6 relative overflow-hidden" id="contact">
         <div className="absolute inset-0 grid-bg opacity-30" />
         <FloatingOrb x="60%" y="10%" size={400} color="#7c3aed" delay={0} />
         <div className="max-w-5xl mx-auto relative z-10">
           <InView>
-            <div className="text-center mb-16">
-              <p className="text-xs tracking-widest uppercase font-semibold mb-3" style={{ color: '#35E4FF' }}>Get In Touch</p>
-              <h2 className="text-4xl sm:text-6xl font-black tracking-tight mb-4">
+            <div className="text-center mb-10 sm:mb-16">
+              <p className="text-xs tracking-widest uppercase font-semibold mb-2 sm:mb-3" style={{ color: '#35E4FF' }}>Get In Touch</p>
+              <h2 className="text-3xl sm:text-6xl font-black tracking-tight mb-3 sm:mb-4">
                 Let&apos;s{' '}
                 <span className="gradient-text">collaborate</span>
               </h2>
-              <p className="text-lg max-w-xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-sm sm:text-lg max-w-xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
                 Have a project in mind? Let&apos;s build something amazing together.
               </p>
             </div>
           </InView>
 
-          <div className="grid md:grid-cols-2 gap-12 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 items-start">
             {/* Left: info */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {[
-                { icon: '✉️', label: 'Email', value: 'varunkehlawat@gmail.com', href: 'mailto:varunkehlawat@gmail.com' },
-                { icon: '💼', label: 'LinkedIn', value: 'varun-kehlawat-662a81379', href: 'https://www.linkedin.com/in/varun-kehlawat-662a81379/' },
-                { icon: '📸', label: 'Instagram', value: '@varunkehlawatt', href: 'https://www.instagram.com/varunkehlawatt' },
-              ].map(({ icon, label, value, href }) => (
+                { icon: Mail, label: 'Email', value: hero?.email || 'varunkehlawat@gmail.com', href: `mailto:${hero?.email || 'varunkehlawat@gmail.com'}`, color: '#a78bfa' },
+                { icon: LinkedinIcon, label: 'LinkedIn', value: 'varun-kehlawat-662a81379', href: hero?.linkedin || 'https://www.linkedin.com/in/varun-kehlawat-662a81379/', color: '#0077b5' },
+                { icon: InstagramIcon, label: 'Instagram', value: '@varunkehlawatt', href: hero?.instagram || 'https://www.instagram.com/varunkehlawatt', color: '#e1306c' },
+              ].map(({ icon: IconComp, label, value, href, color }) => (
                 <TiltCard key={label} intensity={8}>
                   <a href={href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                    <div className="flex items-center gap-4 p-5 rounded-2xl glass transition-all hover:border-violet-500/30"
+                    <div className="flex items-center gap-3.5 sm:gap-4 p-4 sm:p-5 rounded-2xl glass transition-all hover:border-violet-500/30"
                       style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-                      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                      style={{ background: 'rgba(53,228,255,0.1)', border: '1px solid rgba(53,228,255,0.25)' }}>
-                        {icon}
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: `${color}18`, border: `1px solid ${color}35`, boxShadow: `0 0 15px ${color}25` }}>
+                        <IconComp className="w-5 h-5" style={{ color }} />
                       </div>
-                      <div>
-                        <div className="text-xs font-semibold tracking-wider uppercase" style={{ color: '#9290b0' }}>{label}</div>
-                        <div className="text-sm font-medium" style={{ color: '#f1f0ff' }}>{value}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase" style={{ color: '#9290b0' }}>{label}</div>
+                        <div className="text-xs sm:text-sm font-medium truncate" style={{ color: '#f1f0ff' }}>{value}</div>
                       </div>
                     </div>
                   </a>
@@ -690,9 +800,9 @@ export default function Page() {
 
             {/* Right: form */}
             <TiltCard intensity={5} className="h-full">
-              <div className="p-8 rounded-2xl h-full"
+              <div className="p-5 sm:p-8 rounded-2xl h-full"
                 style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <h3 className="text-lg font-bold mb-6">Send a Message</h3>
+                <h3 className="text-base sm:text-lg font-bold mb-4 sm:mb-6">Send a Message</h3>
                 <form onSubmit={handleContact} className="space-y-4">
                   {[
                     { id: 'name', label: 'Your Name', type: 'text', placeholder: 'John Doe' },
@@ -766,22 +876,22 @@ export default function Page() {
       </section>
 
       {/* ── Footer ────────────────────────────────────────────────── */}
-      <footer className="py-8 px-8 text-center text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
+      <footer className="py-8 px-4 sm:px-8 text-center text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-5xl mx-auto">
           <span className="font-black gradient-text text-sm">Varun Kehlawat</span>
-          <TextLoop interval={4} className="text-xs text-slate-400 font-medium">
-            <span className="flex items-center gap-1.5">
+          <TextLoop interval={4} className="text-xs text-slate-400 font-medium text-center max-w-full px-2">
+            <span className="flex flex-col xs:flex-row items-center gap-0.5 xs:gap-1.5">
               <span className="text-cyan-400 font-semibold">Full Stack Developer</span>
-              <span>·</span>
+              <span className="hidden xs:inline">·</span>
               <span className="text-purple-400 font-semibold">BCA AI &amp; DS Student</span>
             </span>
-            <span className="flex items-center gap-1.5">
+            <span className="flex flex-col xs:flex-row items-center gap-0.5 xs:gap-1.5">
               <span className="text-indigo-400 font-semibold">Building Modern Web &amp; AI Apps</span>
-              <span>·</span>
+              <span className="hidden xs:inline">·</span>
               <span className="text-teal-400 font-semibold">Passionate about Tech</span>
             </span>
           </TextLoop>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap justify-center items-center gap-4">
             <a href="https://www.linkedin.com/in/varun-kehlawat-662a81379/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}
               onMouseEnter={e => (e.currentTarget.style.color = '#a78bfa')}
               onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>
@@ -793,9 +903,10 @@ export default function Page() {
               Instagram
             </a>
             <a href="/admin" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}
+              className="inline-flex items-center gap-1"
               onMouseEnter={e => (e.currentTarget.style.color = '#a78bfa')}
               onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>
-              Admin ⚙
+              Admin <Settings className="w-3.5 h-3.5 opacity-70" />
             </a>
             <span>© 2026</span>
           </div>
@@ -804,3 +915,4 @@ export default function Page() {
     </div>
   );
 }
+

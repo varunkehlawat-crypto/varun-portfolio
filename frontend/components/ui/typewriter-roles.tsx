@@ -41,7 +41,7 @@ export function TypewriterRoles({ roles }: { roles: string[] }) {
 
   return (
     <div
-      className="text-[clamp(15px,2.4vw,22px)] text-[#35E4FF] min-h-[1.4em] mb-[22px] flex items-center justify-center tracking-normal font-normal select-none"
+      className="text-[clamp(13px,3.8vw,20px)] sm:text-[clamp(16px,2.4vw,22px)] text-[#35E4FF] min-h-[1.5em] mb-[20px] sm:mb-[22px] flex items-center justify-center tracking-normal font-normal select-none px-2 text-center"
       style={{ fontFamily: '"JetBrains Mono", monospace' }}
     >
       <span>{text}</span>

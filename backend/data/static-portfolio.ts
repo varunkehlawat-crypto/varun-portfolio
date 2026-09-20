@@ -1,4 +1,4 @@
-﻿// Static fallback data — used when Supabase is not configured or unreachable.
+// Static fallback data — used when Supabase is not configured or unreachable.
 // Edit this file to update the default content shown on the site.
 
 export type Hero = {
@@ -36,16 +36,19 @@ export const STATIC_PROJECTS: Project[] = [
 ];
 
 export const STATIC_SKILLS: Skill[] = [
-  { name: 'React',        icon: '⚛️', color: '#61dafb' },
-  { name: 'Next.js',      icon: '▲',  color: '#ffffff' },
-  { name: 'TypeScript',   icon: '📘', color: '#3178c6' },
-  { name: 'Node.js',      icon: '🟢', color: '#5fa04e' },
-  { name: 'PostgreSQL',   icon: '🐘', color: '#4169e1' },
-  { name: 'Tailwind CSS', icon: '🎨', color: '#38bdf8' },
-  { name: 'Three.js',     icon: '⬡',  color: '#7c3aed' },
-  { name: 'Python',       icon: '🐍', color: '#f7c948' },
-  { name: 'AI / ML',      icon: '🤖', color: '#ec4899' },
-  { name: 'Supabase',     icon: '⚡', color: '#3ecf8e' },
+  { name: 'React',        icon: 'https://cdn.simpleicons.org/react/61DAFB',        color: '#61dafb' },
+  { name: 'Next.js',      icon: 'https://cdn.simpleicons.org/nextdotjs/ffffff',     color: '#ffffff' },
+  { name: 'TypeScript',   icon: 'https://cdn.simpleicons.org/typescript/3178C6',   color: '#3178c6' },
+  { name: 'Node.js',      icon: 'https://cdn.simpleicons.org/nodedotjs/5FA04E',     color: '#5fa04e' },
+  { name: 'PostgreSQL',   icon: 'https://cdn.simpleicons.org/postgresql/4169E1',   color: '#4169e1' },
+  { name: 'Tailwind CSS', icon: 'https://cdn.simpleicons.org/tailwindcss/06B6D4',   color: '#38bdf8' },
+  { name: 'Three.js',     icon: 'https://cdn.simpleicons.org/threedotjs/ffffff',   color: '#ffffff' },
+  { name: 'Python',       icon: 'https://cdn.simpleicons.org/python/3776AB',       color: '#f7c948' },
+  { name: 'Supabase',     icon: 'https://cdn.simpleicons.org/supabase/3ECF8E',     color: '#3ecf8e' },
+  { name: 'Git',          icon: 'https://cdn.simpleicons.org/git/F05032',          color: '#f05032' },
+  { name: 'Prisma',       icon: 'https://cdn.simpleicons.org/prisma/ffffff',       color: '#a78bfa' },
+  { name: 'Java',         icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg', color: '#e76f51' },
+  { name: 'AI / ML',      icon: 'https://cdn.simpleicons.org/tensorflow/FF6F00',   color: '#ec4899' },
 ];
 
 export const STATIC_PORTFOLIO = {

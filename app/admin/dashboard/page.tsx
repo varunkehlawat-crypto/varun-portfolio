@@ -29,7 +29,7 @@ const INPUT_STYLE = {
 };
 
 const BTN = (variant: 'primary' | 'danger' | 'ghost' | 'success') => ({
-  padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+  padding: '8px 16px', borderRadius: 8, cursor: 'pointer',
   fontWeight: 600, fontSize: 13, transition: 'all 0.2s',
   fontFamily: 'Inter, system-ui, sans-serif',
   background:
@@ -48,6 +48,80 @@ const BTN = (variant: 'primary' | 'danger' | 'ghost' | 'success') => ({
     : variant === 'ghost' ? '1px solid rgba(255,255,255,0.1)'
     : 'none',
 });
+
+const BRAND_ICON_MAP: Record<string, { slug: string; color: string }> = {
+  'react': { slug: 'react', color: '#61dafb' },
+  'next.js': { slug: 'nextdotjs', color: '#ffffff' },
+  'nextjs': { slug: 'nextdotjs', color: '#ffffff' },
+  'typescript': { slug: 'typescript', color: '#3178c6' },
+  'javascript': { slug: 'javascript', color: '#f7df1e' },
+  'js': { slug: 'javascript', color: '#f7df1e' },
+  'ts': { slug: 'typescript', color: '#3178c6' },
+  'node.js': { slug: 'nodedotjs', color: '#5fa04e' },
+  'nodejs': { slug: 'nodedotjs', color: '#5fa04e' },
+  'node': { slug: 'nodedotjs', color: '#5fa04e' },
+  'postgresql': { slug: 'postgresql', color: '#4169e1' },
+  'postgres': { slug: 'postgresql', color: '#4169e1' },
+  'tailwind css': { slug: 'tailwindcss', color: '#38bdf8' },
+  'tailwind': { slug: 'tailwindcss', color: '#38bdf8' },
+  'three.js': { slug: 'threedotjs', color: '#ffffff' },
+  'threejs': { slug: 'threedotjs', color: '#ffffff' },
+  'python': { slug: 'python', color: '#3776ab' },
+  'supabase': { slug: 'supabase', color: '#3ecf8e' },
+  'git': { slug: 'git', color: '#f05032' },
+  'github': { slug: 'github', color: '#ffffff' },
+  'prisma': { slug: 'prisma', color: '#ffffff' },
+  'mongodb': { slug: 'mongodb', color: '#47a248' },
+  'docker': { slug: 'docker', color: '#2496ed' },
+  'graphql': { slug: 'graphql', color: '#e10098' },
+  'redis': { slug: 'redis', color: '#dc382d' },
+  'flutter': { slug: 'flutter', color: '#02569b' },
+  'aws': { slug: 'amazonwebservices', color: '#ff9900' },
+  'firebase': { slug: 'firebase', color: '#ffca28' },
+  'figma': { slug: 'figma', color: '#f24e1e' },
+  'rust': { slug: 'rust', color: '#ffffff' },
+  'go': { slug: 'go', color: '#00add8' },
+  'golang': { slug: 'go', color: '#00add8' },
+  'kubernetes': { slug: 'kubernetes', color: '#326ce5' },
+  'k8s': { slug: 'kubernetes', color: '#326ce5' },
+  'vue': { slug: 'vuedotjs', color: '#4fc08d' },
+  'vue.js': { slug: 'vuedotjs', color: '#4fc08d' },
+  'angular': { slug: 'angular', color: '#dd0031' },
+  'html': { slug: 'html5', color: '#e34f26' },
+  'css': { slug: 'css3', color: '#1572b6' },
+  'sass': { slug: 'sass', color: '#cc6699' },
+  'c++': { slug: 'cplusplus', color: '#00599c' },
+  'cpp': { slug: 'cplusplus', color: '#00599c' },
+  'ai / ml': { slug: 'tensorflow', color: '#ff6f00' },
+  'ai': { slug: 'openai', color: '#ffffff' },
+};
+
+function autoResolveSkillIcon(name: string) {
+  const clean = name.trim().toLowerCase();
+  if (!clean) return { icon: '', color: '#7c3aed' };
+
+  if (clean === 'java') {
+    return {
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg',
+      color: '#e76f51',
+    };
+  }
+
+  if (BRAND_ICON_MAP[clean]) {
+    const item = BRAND_ICON_MAP[clean];
+    const hex = item.color.replace('#', '');
+    return {
+      icon: `https://cdn.simpleicons.org/${item.slug}/${hex}`,
+      color: item.color,
+    };
+  }
+
+  const slug = clean.replace(/[^a-z0-9]/g, '');
+  return {
+    icon: `https://cdn.simpleicons.org/${slug}`,
+    color: '#a78bfa',
+  };
+}
 
 function formatDate(isoStr: string) {
   try {
@@ -161,17 +235,15 @@ export default function AdminDashboard() {
   return (
     <div style={{ minHeight: '100vh', background: '#05050f', fontFamily: 'Inter, system-ui, sans-serif', color: '#f1f0ff' }}>
       {/* Topbar */}
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(5,5,15,0.85)', backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        padding: '14px 32px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
+      <nav className="sticky top-0 z-50 flex items-center justify-between px-4 sm:px-8 py-3.5 flex-wrap gap-2"
+        style={{
+          background: 'rgba(5,5,15,0.85)', backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+        }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 20 }}>⚡</span>
           <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Portfolio Admin</span>
-          <span style={{
+          <span className="hidden xs:inline-block" style={{
             padding: '2px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
             background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)',
           }}>LIVE</span>
@@ -182,10 +254,10 @@ export default function AdminDashboard() {
         </div>
       </nav>
 
-      <div style={{ maxWidth: 880, margin: '0 auto', padding: '40px 24px' }}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Welcome */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: '-0.03em' }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 24 }}>
+          <h1 className="text-2xl sm:text-3xl font-extrabold m-0 tracking-tight">
             Welcome back, Varun 👋
           </h1>
           <p style={{ color: '#9290b0', marginTop: 6, fontSize: 14 }}>
@@ -194,9 +266,9 @@ export default function AdminDashboard() {
         </motion.div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 4, marginBottom: 28, background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 4, width: 'fit-content', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="flex gap-1 mb-6 bg-[rgba(255,255,255,0.03)] rounded-xl p-1 max-w-full overflow-x-auto custom-scrollbar border border-[rgba(255,255,255,0.07)]">
           {(['hero', 'projects', 'skills', 'inbox'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)} style={TAB_STYLE(tab === t)}>
+            <button key={t} onClick={() => setTab(t)} style={TAB_STYLE(tab === t)} className="whitespace-nowrap flex-shrink-0">
               {t === 'hero' ? '🙋 Hero' : t === 'projects' ? '🚀 Projects' : t === 'skills' ? '🛠️ Skills' : '📨 Inbox'}
               {t === 'inbox' && unreadCount > 0 && (
                 <span style={{
@@ -293,33 +365,69 @@ export default function AdminDashboard() {
         {/* ─── SKILLS TAB ─── */}
         {tab === 'skills' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="skills" style={{ display: 'grid', gap: 20 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 12 }}>
               {data.skills.map((s: any) => (
                 <div key={s.id || s.name} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 20 }}>{s.icon}</span>
-                    <span style={{ fontWeight: 600, fontSize: 13, color: s.color }}>{s.name}</span>
+                    {s.icon && s.icon.startsWith('http') ? (
+                      <img src={s.icon} alt={s.name} style={{ width: 22, height: 22, objectFit: 'contain' }} />
+                    ) : (
+                      <span style={{ fontSize: 20 }}>{s.icon}</span>
+                    )}
+                    <span style={{ fontWeight: 600, fontSize: 13, color: s.color || '#fff' }}>{s.name}</span>
                   </div>
                   <button onClick={() => deleteSkill(s.id || s.name)} style={{ ...BTN('danger'), padding: '4px 8px', fontSize: 11 }}>✕</button>
                 </div>
               ))}
             </div>
             <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 14, padding: 24 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 16px', color: '#a78bfa' }}>➕ Add Skill</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 140px', gap: 12, alignItems: 'end' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#a78bfa' }}>➕ Add Skill</h3>
+                <span style={{ fontSize: 11, color: '#9290b0', background: 'rgba(124,58,237,0.15)', padding: '3px 10px', borderRadius: 20, border: '1px solid rgba(124,58,237,0.3)' }}>
+                  ✨ Automatic Brand Icon Resolution
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px', gap: 12, alignItems: 'end' }}>
                 <div>
-                  <label style={{ display: 'block', color: '#9290b0', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>Name</label>
-                  <input style={INPUT_STYLE} value={newSkill.name} onChange={e => setNewSkill(s => ({ ...s, name: e.target.value }))} />
+                  <label style={{ display: 'block', color: '#9290b0', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>Skill Name</label>
+                  <input
+                    style={INPUT_STYLE}
+                    placeholder="e.g. Docker, MongoDB, GraphQL, React"
+                    value={newSkill.name || ''}
+                    onChange={e => {
+                      const val = e.target.value;
+                      const resolved = autoResolveSkillIcon(val);
+                      setNewSkill({
+                        name: val,
+                        icon: resolved.icon || '',
+                        color: resolved.color || '#7c3aed',
+                      });
+                    }}
+                  />
                 </div>
                 <div>
-                  <label style={{ display: 'block', color: '#9290b0', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>Icon</label>
-                  <input style={INPUT_STYLE} value={newSkill.icon} onChange={e => setNewSkill(s => ({ ...s, icon: e.target.value }))} />
+                  <label style={{ display: 'block', color: '#9290b0', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>Icon URL (Auto-fetched)</label>
+                  <input style={INPUT_STYLE} value={newSkill.icon || ''} onChange={e => setNewSkill(s => ({ ...s, icon: e.target.value }))} />
                 </div>
                 <div>
                   <label style={{ display: 'block', color: '#9290b0', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>Color</label>
-                  <input style={INPUT_STYLE} value={newSkill.color} onChange={e => setNewSkill(s => ({ ...s, color: e.target.value }))} />
+                  <input style={INPUT_STYLE} value={newSkill.color || '#7c3aed'} onChange={e => setNewSkill(s => ({ ...s, color: e.target.value }))} />
                 </div>
               </div>
+
+              {/* Live Preview */}
+              {newSkill.name && (
+                <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <span style={{ fontSize: 11, color: '#9290b0', fontWeight: 600 }}>PREVIEW:</span>
+                  {newSkill.icon && newSkill.icon.startsWith('http') ? (
+                    <img src={newSkill.icon} alt="Preview" style={{ width: 22, height: 22, objectFit: 'contain' }} />
+                  ) : (
+                    <span>{newSkill.icon}</span>
+                  )}
+                  <span style={{ fontSize: 13, fontWeight: 700, color: newSkill.color || '#fff' }}>{newSkill.name}</span>
+                </div>
+              )}
+
               <motion.button whileTap={{ scale: 0.97 }} onClick={() => saveSkill(newSkill)} style={{ ...BTN('primary'), padding: '10px 20px', marginTop: 14 }}>
                 Add Skill →
               </motion.button>

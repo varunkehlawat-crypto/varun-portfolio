@@ -1,6 +1,9 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { isAdminAuthenticated } from '@/backend/lib/auth';
 import { STATIC_PORTFOLIO } from '@/backend/data/static-portfolio';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 async function getSupabaseClient(serviceRole = false) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
