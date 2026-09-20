@@ -458,11 +458,16 @@ export default function Page() {
           </div>
 
           {/* Name */}
-          <h1 className="text-4xl xs:text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-tight mb-3 sm:mb-4">
-            <TextEffect preset="blur" per="word" delay={0.2} as="span" className="block gradient-text">
-              Varun Kehlawat
-            </TextEffect>
-          </h1>
+          <motion.h1
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="text-4xl xs:text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-tight mb-3 sm:mb-4"
+          >
+            <span className="block gradient-text">
+              {hero?.name || 'Varun Kehlawat'}
+            </span>
+          </motion.h1>
 
           {/* Typewriter Roles */}
           <TypewriterRoles roles={['Full-Stack Developer', 'BCA · AI & Data Science', 'Builder of AI-powered things']} />
